@@ -2,6 +2,7 @@
 
 import { mergeRefs } from '@/lib/merge-refs'
 import { AriaButtonProps, useButton } from '@react-aria/button'
+import { useFocusRing } from '@react-aria/focus'
 import { VariantProps, cva } from 'class-variance-authority'
 import clsx from 'clsx'
 import { MotionProps, motion, useAnimationControls } from 'framer-motion'
@@ -17,10 +18,9 @@ const variants = cva(
     'cursor-pointer',
     'disabled:cursor-not-allowed',
     'tracking-wide',
-    'transition',
+    'transition-colors',
     'rounded-full',
     'outline-none',
-    'focus:scale-[0.98]',
   ],
   {
     variants: {
@@ -34,8 +34,6 @@ const variants = cva(
           'hover:shadow-md',
           'disabled:bg-indigo-500/50',
           'disabled:shadow',
-          'ring-offset-2',
-          'focus-visible:ring-2',
           'ring-indigo-500/70',
         ],
         secondary: [
@@ -47,8 +45,6 @@ const variants = cva(
           'shadow',
           'border',
           'border-neutral-200/50',
-          'ring-offset-2',
-          'focus-visible:ring-2',
           'ring-gray-200',
         ],
         destructive: [
@@ -61,8 +57,6 @@ const variants = cva(
           'hover:shadow-md',
           'disabled:bg-red-500/50',
           'disabled:shadow',
-          'ring-offset-2',
-          'focus-visible:ring-2',
           'ring-red-500',
         ],
         ghost: [
@@ -70,8 +64,7 @@ const variants = cva(
           'text-gray-950',
           'hover:text-gray-600',
           'disabled:text-gray-950',
-          'ring-gray-300',
-          'focus-visible:ring-1',
+          'ring-gray-500/30',
         ],
         link: [
           'font-light',
@@ -80,8 +73,7 @@ const variants = cva(
           'disabled:text-indigo-500/50',
           'disabled:no-underline',
           'hover:underline',
-          'ring-indigo-300',
-          'focus-visible:ring-1',
+          'ring-indigo-500/30',
         ],
       },
       size: {
@@ -89,7 +81,23 @@ const variants = cva(
         default: ['text-base', 'py-2', 'px-8'],
         large: ['text-lg', 'py-3', 'px-12'],
       },
+      isFocusVisible: {
+        true: '',
+        false: '',
+      },
     },
+    compoundVariants: [
+      {
+        variant: ['primary', 'secondary', 'destructive'],
+        isFocusVisible: true,
+        className: 'ring-2 ring-offset-2',
+      },
+      {
+        variant: ['ghost', 'link'],
+        isFocusVisible: true,
+        className: 'ring-1',
+      },
+    ],
     defaultVariants: {
       variant: 'primary',
       size: 'default',
@@ -123,27 +131,27 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, children, variant, size, loading, disabled, ...rest },
+    { className, children, variant, size, loading, disabled, onClick, ...rest },
     forwardedRef
   ) => {
     const ref = useRef<HTMLButtonElement>(null)
     const controls = useAnimationControls()
-
+    const { isFocusVisible, focusProps } = useFocusRing()
     const { buttonProps } = useButton(
       {
         ...rest,
-        isDisabled: disabled || loading,
+        isDisabled: disabled,
         onPressStart: () => {
           controls.stop()
           controls.start({
             scale: 0.98,
-            transition: { duration: 0.2 },
+            transition: { duration: 0.15 },
           })
         },
         onPressEnd: () => {
           controls.start({
             scale: 1.0,
-            transition: { duration: 0.3 },
+            transition: { duration: 0.25 },
           })
         },
       },
@@ -154,8 +162,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         ref={mergeRefs([ref, forwardedRef])}
         animate={controls}
-        className={twMerge(clsx(variants({ variant, size, className })))}
+        className={twMerge(
+          clsx(variants({ variant, size, isFocusVisible, className }))
+        )}
         {...(buttonProps as MotionProps)}
+        {...(focusProps as any)}
       >
         {loading && <Loading variant={variant} />}
         <span

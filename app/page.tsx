@@ -21,7 +21,7 @@ export default function Home() {
           className="justify-self-center"
           size="default"
           loading={loading}
-          onClick={() => setLoading(!loading)}
+          onPress={() => setLoading(!loading)}
         >
           Primary
         </Button>
@@ -56,7 +56,7 @@ export default function Home() {
           variant="secondary"
           size="default"
           loading={loading}
-          onClick={() => setLoading(!loading)}
+          onPress={() => setLoading(!loading)}
         >
           Secondary
         </Button>
@@ -95,7 +95,7 @@ export default function Home() {
           variant="destructive"
           size="default"
           loading={loading}
-          onClick={() => setLoading(!loading)}
+          onPress={() => setLoading(!loading)}
         >
           Destructive
         </Button>
@@ -126,7 +126,7 @@ export default function Home() {
           variant="ghost"
           size="default"
           loading={loading}
-          onClick={() => setLoading(!loading)}
+          onPress={() => setLoading(!loading)}
         >
           Ghost
         </Button>
@@ -153,7 +153,7 @@ export default function Home() {
           variant="link"
           size="default"
           loading={loading}
-          onClick={() => setLoading(!loading)}
+          onPress={() => setLoading(!loading)}
         >
           Link
         </Button>

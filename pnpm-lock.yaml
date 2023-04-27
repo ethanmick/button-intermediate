@@ -4,6 +4,9 @@ dependencies:
   '@react-aria/button':
     specifier: 3.7.0
     version: 3.7.0(react@18.2.0)
+  '@react-aria/focus':
+    specifier: ^3.12.0
+    version: 3.12.0(react@18.2.0)
   '@types/node':
     specifier: 18.16.1
     version: 18.16.1
