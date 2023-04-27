@@ -1,8 +1,11 @@
 'use client'
 
+import { mergeRefs } from '@/lib/merge-refs'
+import { AriaButtonProps, useButton } from '@react-aria/button'
 import { VariantProps, cva } from 'class-variance-authority'
 import clsx from 'clsx'
-import { forwardRef } from 'react'
+import { MotionProps, motion, useAnimationControls } from 'framer-motion'
+import { forwardRef, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 const variants = cva(
@@ -14,12 +17,11 @@ const variants = cva(
     'cursor-pointer',
     'disabled:cursor-not-allowed',
     'tracking-wide',
-    'transition',
+    'transition-colors',
     'outline-none',
     'ring-indigo-500/70',
     'ring-offset-2',
     'focus-visible:ring-2',
-    'focus:scale-[0.98]',
   ],
   {
     variants: {
@@ -104,28 +106,59 @@ const Loading = ({ variant }: VariantProps<typeof loading>) => (
 )
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  AriaButtonProps<'button'> &
   VariantProps<typeof variants> & {
     loading?: boolean
   }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, children, variant, size, loading, ...rest }, ref) => (
-    <button
-      ref={ref}
-      className={twMerge(clsx(variants({ variant, size, className })))}
-      {...rest}
-    >
-      {loading && <Loading variant={variant} />}
-      <span
-        className={clsx('transition', {
-          'opacity-0': loading,
-          'opacity-100': !loading,
-        })}
+  (
+    { className, children, variant, size, loading, disabled, ...rest },
+    forwardedRef
+  ) => {
+    const ref = useRef<HTMLButtonElement>(null)
+    const controls = useAnimationControls()
+
+    const { buttonProps } = useButton(
+      {
+        ...rest,
+        isDisabled: disabled || loading,
+        onPressStart: () => {
+          controls.stop()
+          controls.start({
+            scale: 0.98,
+            transition: { duration: 0.2 },
+          })
+        },
+        onPressEnd: () => {
+          controls.start({
+            scale: 1.0,
+            transition: { duration: 0.3 },
+          })
+        },
+      },
+      ref
+    )
+
+    return (
+      <motion.button
+        ref={mergeRefs([ref, forwardedRef])}
+        animate={controls}
+        className={twMerge(clsx(variants({ variant, size, className })))}
+        {...(buttonProps as MotionProps)}
       >
-        {children}
-      </span>
-    </button>
-  )
+        {loading && <Loading variant={variant} />}
+        <span
+          className={clsx('transition', {
+            'opacity-0': loading,
+            'opacity-100': !loading,
+          })}
+        >
+          {children}
+        </span>
+      </motion.button>
+    )
+  }
 )
 
 Button.displayName = 'Button'
