@@ -10,7 +10,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   return (
     <main className="container mx-auto mt-20">
-      <div className="grid grid-cols-4 items-center justify-center gap-8">
+      <div className="grid grid-cols-5 items-center justify-center gap-8">
         <Button className="justify-self-center" size="small">
           Primary
         </Button>
@@ -57,6 +57,15 @@ export default function Home() {
         <Button
           className="justify-self-center"
           variant="secondary"
+          size="default"
+          loading={loading}
+          onClick={() => setLoading(!loading)}
+        >
+          Secondary
+        </Button>
+        <Button
+          className="justify-self-center"
+          variant="secondary"
           size="large"
         >
           Secondary
@@ -87,6 +96,15 @@ export default function Home() {
         <Button
           className="justify-self-center"
           variant="destructive"
+          size="default"
+          loading={loading}
+          onClick={() => setLoading(!loading)}
+        >
+          Destructive
+        </Button>
+        <Button
+          className="justify-self-center"
+          variant="destructive"
           size="large"
         >
           Destructive
@@ -106,6 +124,15 @@ export default function Home() {
         >
           Ghost
         </Button>
+        <Button
+          className="justify-self-center"
+          variant="ghost"
+          size="default"
+          loading={loading}
+          onClick={() => setLoading(!loading)}
+        >
+          Ghost
+        </Button>
         <Button className="justify-self-center" variant="ghost" size="large">
           Ghost
         </Button>
@@ -121,6 +148,15 @@ export default function Home() {
           variant="link"
           size="default"
           disabled
+        >
+          Link
+        </Button>
+        <Button
+          className="justify-self-center"
+          variant="link"
+          size="default"
+          loading={loading}
+          onClick={() => setLoading(!loading)}
         >
           Link
         </Button>

@@ -39,13 +39,13 @@ const variants = cva(
           'font-normal',
           'bg-gray-50',
           'hover:bg-gray-100',
+          'disabled:bg-gray-50',
           'text-gray-950',
           'rounded-full',
           'shadow',
           'border',
           'border-neutral-200/50',
         ],
-        ghost: ['font-light', 'text-gray-950', 'hover:text-gray-600'],
         destructive: [
           'font-semibold',
           'bg-red-500',
@@ -57,10 +57,18 @@ const variants = cva(
           'disabled:bg-red-500/50',
           'disabled:shadow',
         ],
+        ghost: [
+          'font-light',
+          'text-gray-950',
+          'hover:text-gray-600',
+          'disabled:text-gray-950',
+        ],
         link: [
           'font-light',
           'text-indigo-500',
           'hover:text-indigo-600',
+          'disabled:text-indigo-500/50',
+          'disabled:no-underline',
           'hover:underline',
         ],
       },
@@ -77,9 +85,21 @@ const variants = cva(
   }
 )
 
-const Loading = () => (
-  <div className="absolute inline-flex items-center">
-    <div className="w-4 h-4 rounded-full border-2 border-b-transparent animate-spin border-white" />
+const loading = cva(['absolute', 'inline-flex', 'items-center'], {
+  variants: {
+    variant: {
+      primary: ['border-white'],
+      secondary: ['border-gray-950'],
+      destructive: ['border-white'],
+      ghost: ['border-gray-950'],
+      link: ['border-indigo-500'],
+    },
+  },
+})
+
+const Loading = ({ variant }: VariantProps<typeof loading>) => (
+  <div className={loading({ variant })}>
+    <div className="w-4 h-4 rounded-full border-2 border-b-transparent animate-spin border-[inherit]" />
   </div>
 )
 
@@ -95,7 +115,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className={twMerge(clsx(variants({ variant, size, className })))}
       {...rest}
     >
-      {loading && <Loading />}
+      {loading && <Loading variant={variant} />}
       <span
         className={clsx('transition', {
           'opacity-0': loading,
