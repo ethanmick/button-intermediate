@@ -6,8 +6,8 @@ import { useState } from 'react'
 export default function Home() {
   const [loading, setLoading] = useState(false)
   return (
-    <main className="container mx-auto mt-20">
-      <div className="grid grid-cols-5 items-center justify-center gap-8">
+    <main className="container mx-auto mt-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 items-center justify-center gap-8">
         <Button className="justify-self-center" size="small">
           Primary
         </Button>
