@@ -3,11 +3,12 @@
 import { mergeRefs } from '@/lib/merge-refs'
 import { AriaButtonProps, useButton } from '@react-aria/button'
 import { useFocusRing } from '@react-aria/focus'
+import { useHover } from '@react-aria/interactions'
 import { VariantProps, cva } from 'class-variance-authority'
 import clsx from 'clsx'
-import { MotionProps, motion, useAnimationControls } from 'framer-motion'
 import { forwardRef, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { mergeProps } from './merge'
 
 const variants = cva(
   [
@@ -18,8 +19,8 @@ const variants = cva(
     'cursor-pointer',
     'disabled:cursor-not-allowed',
     'tracking-wide',
-    'transition-[background-color,box-shadow,text-color]',
-    'duration-300',
+    'transition-[background-color,box-shadow,text-color,transform]',
+    'duration-200',
     'rounded-full',
     'outline-none',
   ],
@@ -29,13 +30,16 @@ const variants = cva(
         primary: [
           'font-semibold',
           'bg-indigo-500',
-          'hover:bg-indigo-600',
+          'data-[hovered=true]:bg-indigo-600',
           'text-white',
           'shadow',
-          'hover:shadow-md',
+          'data-[hovered=true]:shadow-md',
           'disabled:bg-indigo-500/50',
           'disabled:shadow',
-          'ring-indigo-500/70',
+          'data-[focus-visible]:ring-indigo-500/70',
+          'data-[pressed=true]:scale-[0.98]',
+          'data-[focus-visible]:ring-2',
+          'data-[focus-visible]:ring-offset-2',
         ],
         secondary: [
           'font-normal',
@@ -46,7 +50,10 @@ const variants = cva(
           'shadow',
           'border',
           'border-neutral-200/50',
-          'ring-gray-200',
+          'data-[focus-visible]:ring-gray-200',
+          'data-[pressed=true]:scale-[0.98]',
+          'data-[focus-visible]:ring-2',
+          'data-[focus-visible]:ring-offset-2',
         ],
         destructive: [
           'font-semibold',
@@ -58,14 +65,18 @@ const variants = cva(
           'hover:shadow-md',
           'disabled:bg-red-500/50',
           'disabled:shadow',
-          'ring-red-500',
+          'data-[focus-visible]:ring-red-500',
+          'data-[pressed=true]:scale-[0.98]',
+          'data-[focus-visible]:ring-2',
+          'data-[focus-visible]:ring-offset-2',
         ],
         ghost: [
           'font-light',
           'text-gray-950',
           'hover:text-gray-600',
           'disabled:text-gray-950',
-          'ring-gray-500/30',
+          'data-[focus-visible]:ring-gray-500/30',
+          'data-[focus-visible]:ring-1',
         ],
         link: [
           'font-light',
@@ -74,7 +85,8 @@ const variants = cva(
           'disabled:text-indigo-500/50',
           'disabled:no-underline',
           'hover:underline',
-          'ring-indigo-500/30',
+          'data-[focus-visible]:ring-indigo-500/30',
+          'data-[focus-visible]:ring-1',
         ],
       },
       size: {
@@ -82,23 +94,7 @@ const variants = cva(
         default: ['text-base', 'py-2', 'px-8'],
         large: ['text-lg', 'py-3', 'px-12'],
       },
-      isFocusVisible: {
-        true: '',
-        false: '',
-      },
     },
-    compoundVariants: [
-      {
-        variant: ['primary', 'secondary', 'destructive'],
-        isFocusVisible: true,
-        className: 'ring-2 ring-offset-2',
-      },
-      {
-        variant: ['ghost', 'link'],
-        isFocusVisible: true,
-        className: 'ring-1',
-      },
-    ],
     defaultVariants: {
       variant: 'primary',
       size: 'default',
@@ -131,43 +127,36 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { className, children, variant, size, loading, disabled, onClick, ...rest },
-    forwardedRef
-  ) => {
+  (props, forwardedRef) => {
+    const {
+      className,
+      children,
+      variant,
+      size,
+      loading,
+      disabled,
+      onClick,
+      ...rest
+    } = props
     const ref = useRef<HTMLButtonElement>(null)
-    const controls = useAnimationControls()
     const { isFocusVisible, focusProps } = useFocusRing()
-    const { buttonProps } = useButton(
+    const { hoverProps, isHovered } = useHover(props)
+    const { buttonProps, isPressed } = useButton(
       {
         ...rest,
         isDisabled: disabled,
-        onPressStart: () => {
-          controls.stop()
-          controls.start({
-            scale: 0.98,
-            transition: { duration: 0.15 },
-          })
-        },
-        onPressEnd: () => {
-          controls.start({
-            scale: 1.0,
-            transition: { duration: 0.25 },
-          })
-        },
       },
       ref
     )
 
     return (
-      <motion.button
+      <button
         ref={mergeRefs([ref, forwardedRef])}
-        animate={controls}
-        className={twMerge(
-          clsx(variants({ variant, size, isFocusVisible, className }))
-        )}
-        {...(buttonProps as MotionProps)}
-        {...(focusProps as any)}
+        className={twMerge(clsx(variants({ variant, size, className })))}
+        {...mergeProps(buttonProps, focusProps, hoverProps)}
+        data-pressed={isPressed || undefined}
+        data-hovered={isHovered || undefined}
+        data-focus-visible={isFocusVisible || undefined}
       >
         {loading && <Loading variant={variant} />}
         <span
@@ -178,7 +167,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         >
           {children}
         </span>
-      </motion.button>
+      </button>
     )
   }
 )
